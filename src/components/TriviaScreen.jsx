@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { socket } from "../socket";
-import { triviaQuestions } from "../questions";
+import {
+  easyTriviaQuestions,
+  mediumTriviaQuestions,
+  hardTriviaQuestions,
+} from "../questions";
 import "./TriviaScreen.css";
 
-export default function TriviaScreen({ player, myPlayerName }) {
+export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
   // 1. State Initialization
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
   const [score, setScore] = useState(0);
@@ -27,8 +31,16 @@ export default function TriviaScreen({ player, myPlayerName }) {
 
   // 3. Shuffle questions lazily (only once)
   const [shuffledQuestions] = useState(() => {
-    if (!triviaQuestions || triviaQuestions.length === 0) return [];
-    const shuffled = [...triviaQuestions];
+    let questionsSource = easyTriviaQuestions;
+
+    if (round >= 3 && round <= 5) {
+      questionsSource = mediumTriviaQuestions;
+    } else if (round >= 6) {
+      questionsSource = hardTriviaQuestions;
+    }
+
+    if (!questionsSource || questionsSource.length === 0) return [];
+    const shuffled = [...questionsSource];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];

@@ -129,6 +129,7 @@ function App() {
           key={gameData.currentPlayer?.name || "trivia"}
           player={gameData.currentPlayer}
           myPlayerName={myPlayerName}
+          round={gameData.currentRound}
         />
       )}
       {gameState === "RECAP" && (
