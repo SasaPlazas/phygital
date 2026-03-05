@@ -21,7 +21,7 @@ export default function TurnAnnouncement({ player, round, myPlayerName }) {
   return (
     <div className="turn-wrapper">
       <div className="turn-container">
-        <h2 className="round-title">Ronda {round}</h2>
+        <h2 className="round-title">Ronda {round} / 8</h2>
 
         <div className="player-display">
           <div

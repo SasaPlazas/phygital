@@ -1,9 +1,9 @@
-import { socket } from '../socket';
-import './FinalScreen.css';
+import { socket } from "../socket";
+import "./FinalScreen.css";
 
 export default function FinalScreen({ players }) {
   const handleReset = () => {
-    socket.emit('reset_game');
+    socket.emit("reset_game");
   };
 
   // Sort players by soldiers (optional, to show winner)
@@ -14,21 +14,13 @@ export default function FinalScreen({ players }) {
     <div className="final-wrapper">
       <div className="final-container">
         <h1 className="final-title">Fin del Juego</h1>
-        
-        <div className="winner-display">
-          <p className="winner-label">Ganador</p>
-          <div 
-            className="winner-avatar" 
-            style={{ backgroundColor: winner?.color }}
-          ></div>
-          <h2 className="winner-name">{winner?.name}</h2>
-          <p className="winner-score">{winner?.soldiers} Soldados</p>
-        </div>
+        <h2 className="good-luck-message">¡Buena suerte a todos!</h2>
 
         <div className="instructions-box">
           <h3>Instrucciones Finales</h3>
           <p>
-            Cuenten los territorios ocupados por soldados para determinar el ganador definitivo en el tablero físico.
+            Cuenten cuántos territorios tiene ocupados cada uno para determinar
+            el ganador.
           </p>
         </div>
 
@@ -45,10 +37,7 @@ export default function FinalScreen({ players }) {
           </ul>
         </div>
 
-        <button 
-          className="reset-button"
-          onClick={handleReset}
-        >
+        <button className="reset-button" onClick={handleReset}>
           Volver al inicio
         </button>
       </div>

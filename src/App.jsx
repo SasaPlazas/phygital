@@ -139,9 +139,7 @@ function App() {
           myPlayerName={myPlayerName}
         />
       )}
-      {gameState === "FINAL" && (
-        <FinalScreen finalPlayers={gameData.finalPlayers} />
-      )}
+      {gameState === "FINAL" && <FinalScreen players={gameData.finalPlayers} />}
     </>
   );
 }

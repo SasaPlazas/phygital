@@ -20,7 +20,8 @@ let gameStarted = false;
 let orderedPlayers = [];
 let currentRound = 1;
 let currentPlayerIndex = 0;
-let totalRounds = 0;
+let totalRounds = 8;
+let gameHistory = []; // Stores round-by-round stats
 
 // Helper to shuffle array (Fisher-Yates)
 const shuffleArray = (array) => {
@@ -95,9 +96,11 @@ io.on("connection", (socket) => {
       soldiers: 0,
     }));
 
-    totalRounds = orderedPlayers.length <= 4 ? 8 : 10;
+    // Fixed total rounds as requested
+    totalRounds = 8;
     currentRound = 1;
     currentPlayerIndex = 0;
+    gameHistory = []; // Reset history
 
     console.log("Game started! Order:", orderedPlayers);
 
@@ -128,6 +131,17 @@ io.on("connection", (socket) => {
     const soldiers = score; // 1 soldier per correct answer
     const movements = Math.floor(timeRemaining / 5);
 
+    // Save round history
+    const historyEntry = {
+      round: currentRound,
+      player: orderedPlayers[currentPlayerIndex].name,
+      soldiers,
+      movements,
+      timeRemaining,
+    };
+    gameHistory.push(historyEntry);
+    console.log("Round History Entry:", historyEntry);
+
     // Update player stats (optional, but good for persistence)
     orderedPlayers[currentPlayerIndex].soldiers += soldiers;
 
@@ -136,6 +150,11 @@ io.on("connection", (socket) => {
       movements,
       player: orderedPlayers[currentPlayerIndex],
     });
+  });
+
+  // API endpoint to get game history
+  app.get("/api/game-history", (req, res) => {
+    res.json(gameHistory);
   });
 
   // Next Turn Request (From Recap Screen)
