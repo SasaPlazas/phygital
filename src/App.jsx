@@ -17,6 +17,7 @@ function App() {
     currentPlayer: null,
     turnStats: { soldiers: 0, movements: 0 },
     finalPlayers: [],
+    questions: [],
   });
 
   const [myPlayerName, setMyPlayerName] = useState(() => {
@@ -51,8 +52,12 @@ function App() {
       setGameState("ANNOUNCEMENT");
     }
 
-    function onTriviaStarted() {
-      console.log("Trivia started");
+    function onTriviaStarted(data) {
+      console.log("Trivia started:", data);
+      setGameData((prev) => ({
+        ...prev,
+        questions: data.questions,
+      }));
       setGameState("TRIVIA");
     }
 
@@ -130,6 +135,7 @@ function App() {
           player={gameData.currentPlayer}
           myPlayerName={myPlayerName}
           round={gameData.currentRound}
+          questions={gameData.questions}
         />
       )}
       {gameState === "RECAP" && (

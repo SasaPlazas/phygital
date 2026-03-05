@@ -2,6 +2,11 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import {
+  easyTriviaQuestions,
+  mediumTriviaQuestions,
+  hardTriviaQuestions,
+} from "../src/questions.js";
 
 const app = express();
 app.use(cors());
@@ -22,6 +27,14 @@ let currentRound = 1;
 let currentPlayerIndex = 0;
 let totalRounds = 8;
 let gameHistory = []; // Stores round-by-round stats
+
+// Used questions tracking (by index in their respective arrays)
+// Structure: { easy: Set<number>, medium: Set<number>, hard: Set<number> }
+let usedQuestionIndices = {
+  easy: new Set(),
+  medium: new Set(),
+  hard: new Set(),
+};
 
 // Helper to shuffle array (Fisher-Yates)
 const shuffleArray = (array) => {
@@ -123,57 +136,106 @@ io.on("connection", (socket) => {
 
   // Start Trivia (Go to Trivia Screen)
   socket.on("start_trivia", () => {
-    io.emit("trivia_started");
+    // Determine difficulty based on round
+    let category = "easy";
+    let sourceQuestions = easyTriviaQuestions;
+
+    if (currentRound >= 3 && currentRound <= 5) {
+      category = "medium";
+      sourceQuestions = mediumTriviaQuestions;
+    } else if (currentRound >= 6) {
+      category = "hard";
+      sourceQuestions = hardTriviaQuestions;
+    }
+
+    // Filter out used questions for this category
+    // Note: We track usage globally per game to ensure variety
+    // If we run out, we reset the usage for that category
+    let availableIndices = sourceQuestions
+      .map((_, index) => index)
+      .filter((index) => !usedQuestionIndices[category].has(index));
+
+    if (availableIndices.length === 0) {
+      // Reset if exhausted
+      usedQuestionIndices[category].clear();
+      availableIndices = sourceQuestions.map((_, index) => index);
+    }
+
+    // Shuffle available indices
+    const shuffledIndices = shuffleArray([...availableIndices]);
+
+    // Select up to 20 questions
+    const selectedIndices = shuffledIndices.slice(0, 20);
+
+    // Mark selected as used
+    selectedIndices.forEach((index) =>
+      usedQuestionIndices[category].add(index)
+    );
+
+    // Get the actual question objects
+    const turnQuestions = selectedIndices.map(
+      (index) => sourceQuestions[index]
+    );
+
+    // Send questions to the client
+    io.emit("trivia_started", { questions: turnQuestions });
   });
 
-  // End Turn / Trivia Finished (Go to Recap)
-  socket.on("end_turn", ({ score, timeRemaining }) => {
-    const soldiers = score; // 1 soldier per correct answer
-    const movements = Math.floor(timeRemaining / 5);
+  // Handle end of turn (after trivia)
+  socket.on("end_turn", (data) => {
+    const { correctAnswers, timeLeft } = data;
+    const soldiers = correctAnswers; // 1 soldier per correct answer
+    const movements = Math.floor(timeLeft / 5); // 1 movement per 5s remaining
 
-    // Save round history
-    const historyEntry = {
+    // Update current player stats
+    if (orderedPlayers[currentPlayerIndex]) {
+      orderedPlayers[currentPlayerIndex].soldiers += soldiers;
+      // We aren't tracking movements in the player object in the original code,
+      // but we should probably add it or just log it.
+      // The prompt mentioned "1 movement/5s", so let's store it.
+      if (!orderedPlayers[currentPlayerIndex].movements) {
+        orderedPlayers[currentPlayerIndex].movements = 0;
+      }
+      orderedPlayers[currentPlayerIndex].movements += movements;
+    }
+
+    // Record history
+    gameHistory.push({
       round: currentRound,
-      player: orderedPlayers[currentPlayerIndex].name,
+      player: orderedPlayers[currentPlayerIndex]?.name,
       soldiers,
       movements,
-      timeRemaining,
-    };
-    gameHistory.push(historyEntry);
-    console.log("Round History Entry:", historyEntry);
+      correctAnswers,
+      timeLeft,
+    });
 
-    // Update player stats (optional, but good for persistence)
-    orderedPlayers[currentPlayerIndex].soldiers += soldiers;
-
-    io.emit("turn_recap", {
-      soldiers,
-      movements,
+    // Emit results to show on client (e.g. "You got X soldiers!")
+    // Sending 'turn_recap' to match client expectation
+    socket.emit("turn_recap", {
       player: orderedPlayers[currentPlayerIndex],
+      soldiers,
+      movements,
+      correctAnswers,
     });
   });
 
-  // API endpoint to get game history
-  app.get("/api/game-history", (req, res) => {
-    res.json(gameHistory);
-  });
-
-  // Next Turn Request (From Recap Screen)
+  // Handle request for next turn
   socket.on("next_turn_request", () => {
+    // Advance player
     currentPlayerIndex++;
-
-    // Check if round is finished
     if (currentPlayerIndex >= orderedPlayers.length) {
       currentPlayerIndex = 0;
       currentRound++;
     }
 
-    // Check if game is finished
+    // Check game over
     if (currentRound > totalRounds) {
       io.emit("game_over", {
-        players: orderedPlayers, // Send final stats
+        players: orderedPlayers,
+        history: gameHistory,
       });
     } else {
-      // Next player's turn
+      // Announce next turn
       const nextPlayer = orderedPlayers[currentPlayerIndex];
       io.emit("turn_announcement", {
         player: nextPlayer,

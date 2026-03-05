@@ -42,6 +42,10 @@ export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
       alert("Este jugador ya está en la lista");
       return;
     }
+    if (players.length >= 4) {
+      alert("Máximo 4 jugadores permitidos");
+      return;
+    }
 
     socket.emit("add_player", playerName.trim());
     setMyPlayerName(playerName.trim()); // Set local identity
@@ -78,13 +82,19 @@ export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
             onClick={handleAddPlayer}
             className="add-button"
             title="Añadir jugador"
+            disabled={players.length >= 4}
           >
             +
           </button>
         </div>
+        {players.length >= 4 && (
+          <p className="limit-message">
+            Se ha alcanzado el límite de 4 jugadores.
+          </p>
+        )}
 
         <div className="players-list-container">
-          <h3>Jugadores ({players.length})</h3>
+          <h3>Jugadores ({players.length}/4)</h3>
           <div className="players-list">
             {players.map((player, index) => {
               const isMe = player === myPlayerName;

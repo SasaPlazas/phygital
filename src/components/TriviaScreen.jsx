@@ -1,13 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { socket } from "../socket";
-import {
-  easyTriviaQuestions,
-  mediumTriviaQuestions,
-  hardTriviaQuestions,
-} from "../questions";
 import "./TriviaScreen.css";
 
-export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
+export default function TriviaScreen({ player, myPlayerName, questions = [] }) {
   // 1. State Initialization
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
   const [score, setScore] = useState(0);
@@ -29,38 +24,19 @@ export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
   // Check equality to be safe against whitespace
   const isMyTurn = pName && myName && pName === myName;
 
-  // 3. Shuffle questions lazily (only once)
-  const [shuffledQuestions] = useState(() => {
-    let questionsSource = easyTriviaQuestions;
-
-    if (round >= 3 && round <= 5) {
-      questionsSource = mediumTriviaQuestions;
-    } else if (round >= 6) {
-      questionsSource = hardTriviaQuestions;
-    }
-
-    if (!questionsSource || questionsSource.length === 0) return [];
-    const shuffled = [...questionsSource];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  });
-
   // 4. Timer Logic
   const scoreRef = useRef(score);
   useEffect(() => {
     scoreRef.current = score;
   }, [score]);
 
-  // Use a ref to track if we have already emitted end_turn to avoid double emission
-  const hasEndedTurnRef = useRef(false);
   const timeLeftRef = useRef(timeLeft);
-
   useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
+
+  // Use a ref to track if we have already emitted end_turn to avoid double emission
+  const hasEndedTurnRef = useRef(false);
 
   const handleStopTimer = useCallback(() => {
     if (!isMyTurn || hasEndedTurnRef.current) return;
@@ -69,43 +45,37 @@ export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
     setIsPaused(true);
 
     socket.emit("end_turn", {
-      score: scoreRef.current,
-      timeRemaining: timeLeftRef.current,
+      correctAnswers: scoreRef.current,
+      timeLeft: timeLeftRef.current,
     });
-  }, [isMyTurn]); // Removed timeLeft dependency to prevent recreation
+  }, [isMyTurn]); // Stable callback
 
   // Timer Effect - Robust Date.now() based
   useEffect(() => {
     // If it's not my turn or paused, don't run the timer
-    if (!isMyTurn || isPaused) return;
+    // Also wait for questions to be loaded
+    if (!isMyTurn || isPaused || !questions || questions.length === 0) return;
 
-    const startTime = Date.now();
-    const initialTime = timeLeft; // Capture current timeLeft (usually 120 on start)
-
-    // Set up the interval
     const intervalId = setInterval(() => {
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - startTime) / 1000);
-      const newTime = initialTime - elapsedSeconds;
-
-      if (newTime <= 0) {
-        setTimeLeft(0);
-        clearInterval(intervalId);
-      } else {
-        setTimeLeft(newTime);
-      }
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
-    // Cleanup on unmount or dependency change
     return () => {
       clearInterval(intervalId);
     };
-  }, [isMyTurn, isPaused]); // Re-run only if turn/pause status changes
+  }, [isMyTurn, isPaused, questions]);
 
   // Check for timeout separately
   useEffect(() => {
+    // Only check if time is 0 and we haven't already stopped
     if (timeLeft === 0 && isMyTurn && !isPaused && !hasEndedTurnRef.current) {
-      // Use setTimeout to avoid potential state update conflicts during render cycle
+      // Use a timeout to push this to the end of the event loop
+      // This avoids "update during render" issues if this effect runs synchronously with a state update
       const timeoutId = setTimeout(() => {
         handleStopTimer();
       }, 0);
@@ -114,22 +84,52 @@ export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
   }, [timeLeft, isMyTurn, isPaused, handleStopTimer]);
 
   // 5. Answer Logic
+  // Track timeout to clear on unmount
+  const answerTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (answerTimeoutRef.current) {
+        clearTimeout(answerTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleAnswerClick = (answer) => {
-    if (!isMyTurn || selectedAnswer !== null) return;
+    // Prevent answering if not my turn, already selected, or game is paused (timer stopped)
+    if (!isMyTurn || selectedAnswer !== null || isPaused) return;
 
     setSelectedAnswer(answer);
-    const correct =
-      answer === shuffledQuestions[currentQuestionIndex].correctAnswer;
+
+    // Safety check
+    if (!questions || questions.length === 0) return;
+
+    const currentQ = questions[currentQuestionIndex];
+    if (!currentQ) return;
+
+    const correct = answer === currentQ.correctAnswer;
+
     setIsAnswerCorrect(correct);
 
     if (correct) {
       setScore((prev) => prev + 1);
     }
 
-    setTimeout(() => {
+    answerTimeoutRef.current = setTimeout(() => {
+      // Check if component is still mounted implicitly by state update working (React handles this gracefully now usually, but let's be safe)
+      // Actually, if unmounted, we shouldn't update state.
+      // But we can't easily check "isMounted" without another ref.
+      // Let's rely on clearing the timeout on unmount.
+
       setSelectedAnswer(null);
       setIsAnswerCorrect(null);
-      setCurrentQuestionIndex((prev) => (prev + 1) % shuffledQuestions.length);
+
+      // Check if we reached the end of questions
+      if (currentQuestionIndex >= questions.length - 1) {
+        handleStopTimer();
+      } else {
+        setCurrentQuestionIndex((prev) => prev + 1);
+      }
     }, 1000);
   };
 
@@ -153,9 +153,10 @@ export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
   }
 
   // 7. Loading state if questions aren't ready
-  if (shuffledQuestions.length === 0) return <div>Cargando preguntas...</div>;
+  if (!questions || questions.length === 0)
+    return <div>Cargando preguntas...</div>;
 
-  const currentQuestion = shuffledQuestions[currentQuestionIndex];
+  const currentQuestion = questions[currentQuestionIndex];
 
   // 8. Main Render
   return (
@@ -177,13 +178,17 @@ export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
         <div className="answers-grid">
           {currentQuestion.answers.map((answer, index) => {
             let buttonClass = "answer-button notranslate";
+            // Highlight selected answer
             if (selectedAnswer === answer) {
               buttonClass += isAnswerCorrect ? " correct" : " incorrect";
-            } else if (
+            }
+            // Highlight correct answer if wrong one was selected
+            if (
               selectedAnswer !== null &&
-              answer === currentQuestion.correctAnswer
+              answer === currentQuestion.correctAnswer &&
+              selectedAnswer !== answer
             ) {
-              // Optional: indicate correct answer
+              buttonClass += " correct";
             }
 
             return (
@@ -202,6 +207,7 @@ export default function TriviaScreen({ player, myPlayerName, round = 1 }) {
         <button
           className="stop-timer-button notranslate"
           onClick={handleStopTimer}
+          disabled={selectedAnswer !== null}
         >
           Terminar turno
         </button>
