@@ -1,0 +1,129 @@
+.trivia-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.trivia-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.trivia-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.timer-box,
+.score-box {
+  background-color: #e5e7eb;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+}
+
+.question-box {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.question-box h2 {
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.answers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive */
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 3rem;
+}
+
+.answer-button {
+  background-color: #f3f4f6;
+  border: 2px solid #e5e7eb;
+  padding: 1.5rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #374151;
+}
+
+.answer-button:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.answer-button.correct {
+  background-color: #d1fae5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+.answer-button.incorrect {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+.stop-timer-button {
+  background-color: #ef4444; /* Red for stop action */
+  color: white;
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.stop-timer-button:hover {
+  background-color: #dc2626;
+}
+
+/* Waiting Mode Styles */
+.waiting-mode {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.waiting-mode h2 {
+  color: #4b5563;
+  margin-bottom: 2rem;
+}
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #646cff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 2rem auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
