@@ -100,27 +100,39 @@ io.on("connection", (socket) => {
     if (players.length < 2) return;
 
     gameStarted = true;
-
-    // Shuffle players and assign colors
-    const shuffledNames = shuffleArray([...players]);
-    orderedPlayers = shuffledNames.map((name) => ({
-      name,
-      color: getRandomColor(),
-      soldiers: 0,
-    }));
-
-    // Fixed total rounds as requested
-    totalRounds = 8;
     currentRound = 1;
     currentPlayerIndex = 0;
     gameHistory = []; // Reset history
 
-    console.log("Game started! Order:", orderedPlayers);
+    // Shuffle players for random turn order
+    const shuffledPlayers = [...players];
+    for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledPlayers[i], shuffledPlayers[j]] = [
+        shuffledPlayers[j],
+        shuffledPlayers[i],
+      ];
+    }
+
+    orderedPlayers = shuffledPlayers.map((name) => ({
+      name,
+      color: getRandomColor(),
+      score: 0,
+    }));
+
+    // Clear used questions
+    usedQuestionIndices = {
+      easy: new Set(),
+      medium: new Set(),
+      hard: new Set(),
+    };
 
     io.emit("game_started", {
       players: orderedPlayers,
-      totalRounds,
+      totalRounds: totalRounds,
     });
+
+    console.log("Game started with:", orderedPlayers);
   });
 
   // Start Rounds (Go to Turn Announcement)
@@ -189,14 +201,10 @@ io.on("connection", (socket) => {
 
     // Update current player stats
     if (orderedPlayers[currentPlayerIndex]) {
-      orderedPlayers[currentPlayerIndex].soldiers += soldiers;
-      // We aren't tracking movements in the player object in the original code,
-      // but we should probably add it or just log it.
-      // The prompt mentioned "1 movement/5s", so let's store it.
-      if (!orderedPlayers[currentPlayerIndex].movements) {
-        orderedPlayers[currentPlayerIndex].movements = 0;
-      }
-      orderedPlayers[currentPlayerIndex].movements += movements;
+      orderedPlayers[currentPlayerIndex].soldiers =
+        (orderedPlayers[currentPlayerIndex].soldiers || 0) + soldiers;
+      orderedPlayers[currentPlayerIndex].movements =
+        (orderedPlayers[currentPlayerIndex].movements || 0) + movements;
     }
 
     // Record history
@@ -207,6 +215,7 @@ io.on("connection", (socket) => {
       movements,
       correctAnswers,
       timeLeft,
+      timestamp: new Date().toISOString(),
     });
 
     // Emit results to show on client (e.g. "You got X soldiers!")
@@ -245,14 +254,14 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Reset game
-  socket.on("reset_game", () => {
+  socket.on("game_reset", () => {
     gameStarted = false;
     players = [];
     orderedPlayers = [];
     currentRound = 1;
     currentPlayerIndex = 0;
-    totalRounds = 0;
+    totalRounds = 8;
+    gameHistory = [];
 
     io.emit("game_reset");
     io.emit("update_players", []);
@@ -262,6 +271,11 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
+});
+
+// API Endpoint for game history
+app.get("/api/game-history", (req, res) => {
+  res.json(gameHistory);
 });
 
 const PORT = 3001;
