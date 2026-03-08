@@ -1,14 +1,18 @@
 import { io } from "socket.io-client";
 
-// Use environment variable if available, otherwise construct URL from current location
-// This allows it to work on mobile when accessing via IP address
-const URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+// Hardcoded Production URL to ensure connection works
+const RENDER_URL = "https://phygital-server.onrender.com";
+
+// If in Production (Vercel), use Render URL.
+// If in Development (Local), use local network IP.
+const URL = import.meta.env.PROD
+  ? RENDER_URL
+  : `${window.location.protocol}//${window.location.hostname}:3001`;
 
 // Log to help debug connection issues in production
 console.log("Socket initializing...");
 console.log("Environment mode:", import.meta.env.MODE);
-console.log("VITE_API_URL configured:", import.meta.env.VITE_API_URL ? "Yes" : "No");
-console.log("Socket connecting to:", URL);
+console.log("Target URL:", URL);
 
 let socket;
 
