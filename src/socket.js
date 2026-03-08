@@ -1,8 +1,8 @@
 import { io } from "socket.io-client";
 
-// Use environment variable if available, otherwise default to localhost
-// Important: For mobile testing, localhost won't work. You need your computer's IP.
-const URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+// Use environment variable if available, otherwise construct URL from current location
+// This allows it to work on mobile when accessing via IP address
+const URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
 
 console.log("Socket connecting to:", URL);
 

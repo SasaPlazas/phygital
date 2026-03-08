@@ -349,7 +349,7 @@ app.get("/api/game-history", (req, res) => {
   res.json(gameHistory);
 });
 
-const PORT = 3001;
-httpServer.listen(PORT, () => {
+const PORT = process.env.PORT || 3001;
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
