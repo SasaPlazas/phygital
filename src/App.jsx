@@ -112,7 +112,11 @@ function GameNavigator() {
         turnStats: { soldiers: 0, movements: 0 },
         finalPlayers: [],
         questions: [],
+        questionIndices: [],
       });
+      // Clear local player identity on game reset so they can re-register
+      setMyPlayerName("");
+      sessionStorage.removeItem("myPlayerName");
       navigate("/");
     }
 

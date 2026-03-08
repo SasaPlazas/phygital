@@ -36,6 +36,9 @@ export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
     };
   }, []);
 
+  // No auto-clearing logic to avoid race conditions.
+  // User can use "Cambiar nombre" button manually if stuck.
+
   const handleAddPlayer = () => {
     if (playerName.trim() === "") return;
     if (players.includes(playerName.trim())) {
@@ -58,6 +61,11 @@ export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
   };
 
   const handleRemovePlayer = (indexToRemove) => {
+    const playerToRemove = players[indexToRemove];
+    if (playerToRemove === myPlayerName) {
+      setMyPlayerName("");
+      sessionStorage.removeItem("myPlayerName");
+    }
     socket.emit("remove_player", indexToRemove);
   };
 
@@ -69,24 +77,47 @@ export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
           {isConnected ? "Conectado en tiempo real" : "Conectando..."}
         </p>
 
-        <div className="input-group">
-          <input
-            type="text"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            placeholder="Nombre del jugador"
-            onKeyDown={(e) => e.key === "Enter" && handleAddPlayer()}
-            autoFocus
-          />
-          <button
-            onClick={handleAddPlayer}
-            className="add-button"
-            title="Añadir jugador"
-            disabled={players.length >= 4}
-          >
-            +
-          </button>
-        </div>
+        {!myPlayerName && (
+          <div className="input-group">
+            <input
+              type="text"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Nombre del jugador"
+              onKeyDown={(e) => e.key === "Enter" && handleAddPlayer()}
+              autoFocus
+            />
+            <button
+              onClick={handleAddPlayer}
+              className="add-button"
+              title="Añadir jugador"
+              disabled={players.length >= 4}
+            >
+              +
+            </button>
+          </div>
+        )}
+        {myPlayerName && (
+          <div className="registered-container">
+            <p className="registered-message">
+              Registrado como: <strong>{myPlayerName}</strong>
+            </p>
+            <button
+              onClick={() => {
+                setMyPlayerName("");
+                sessionStorage.removeItem("myPlayerName");
+                // Also try to remove from server just in case
+                const myIndex = players.indexOf(myPlayerName);
+                if (myIndex !== -1) {
+                  socket.emit("remove_player", myIndex);
+                }
+              }}
+              className="change-player-button"
+            >
+              Cambiar nombre / Salir
+            </button>
+          </div>
+        )}
         {players.length >= 4 && (
           <p className="limit-message">
             Se ha alcanzado el límite de 4 jugadores.
