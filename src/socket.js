@@ -1,7 +1,10 @@
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
 // Use environment variable if available, otherwise default to localhost
-const URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Important: For mobile testing, localhost won't work. You need your computer's IP.
+const URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
+console.log("Socket connecting to:", URL);
 
 let socket;
 
