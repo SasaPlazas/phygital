@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import RegistrationScreen from "./components/RegistrationScreen";
 import OrderScreen from "./components/OrderScreen";
 import TurnAnnouncement from "./components/TurnAnnouncement";
 import TriviaScreen from "./components/TriviaScreen";
 import RecapScreen from "./components/RecapScreen";
+import AttackScreen from "./components/AttackScreen";
 import FinalScreen from "./components/FinalScreen";
 import { socket } from "./socket";
 import "./App.css";
 
-function App() {
-  const [gameState, setGameState] = useState("REGISTRATION"); // 'REGISTRATION' | 'ORDER' | 'ANNOUNCEMENT' | 'TRIVIA' | 'RECAP' | 'FINAL'
+function GameNavigator() {
+  const navigate = useNavigate();
+  // eslint-disable-next-line no-unused-vars
+  const [gameState, setGameState] = useState("REGISTRATION"); // Kept for reference but not for navigation
   const [gameData, setGameData] = useState({
     players: [],
     totalRounds: 0,
@@ -39,6 +43,7 @@ function App() {
         totalRounds: data.totalRounds,
       }));
       setGameState("ORDER");
+      navigate("/order");
     }
 
     function onTurnAnnouncement(data) {
@@ -50,6 +55,7 @@ function App() {
         totalRounds: data.totalRounds,
       }));
       setGameState("ANNOUNCEMENT");
+      navigate("/announcement");
     }
 
     function onTriviaStarted(data) {
@@ -59,6 +65,7 @@ function App() {
         questions: data.questions,
       }));
       setGameState("TRIVIA");
+      navigate("/trivia");
     }
 
     function onTurnRecap(data) {
@@ -69,6 +76,17 @@ function App() {
         currentPlayer: data.player,
       }));
       setGameState("RECAP");
+      navigate("/recap");
+    }
+
+    function onAttackStarted(data) {
+      console.log("Attack started:", data);
+      setGameData((prev) => ({
+        ...prev,
+        currentPlayer: data.player,
+      }));
+      setGameState("ATTACK");
+      navigate("/attack");
     }
 
     function onGameOver(data) {
@@ -78,6 +96,7 @@ function App() {
         finalPlayers: data.players,
       }));
       setGameState("FINAL");
+      navigate("/final");
     }
 
     function onGameReset() {
@@ -90,13 +109,16 @@ function App() {
         currentPlayer: null,
         turnStats: { soldiers: 0, movements: 0 },
         finalPlayers: [],
+        questions: [],
       });
+      navigate("/");
     }
 
     socket.on("game_started", onGameStarted);
     socket.on("turn_announcement", onTurnAnnouncement);
     socket.on("trivia_started", onTriviaStarted);
     socket.on("turn_recap", onTurnRecap);
+    socket.on("attack_started", onAttackStarted);
     socket.on("game_over", onGameOver);
     socket.on("game_reset", onGameReset);
 
@@ -105,48 +127,82 @@ function App() {
       socket.off("turn_announcement", onTurnAnnouncement);
       socket.off("trivia_started", onTriviaStarted);
       socket.off("turn_recap", onTurnRecap);
+      socket.off("attack_started", onAttackStarted);
       socket.off("game_over", onGameOver);
       socket.off("game_reset", onGameReset);
     };
-  }, []);
-
-  // Identity check removed per user request
+  }, [navigate]);
 
   return (
-    <>
-      {gameState === "REGISTRATION" && (
-        <RegistrationScreen
-          setMyPlayerName={setMyPlayerName}
-          myPlayerName={myPlayerName}
-        />
-      )}
-      {gameState === "ORDER" && <OrderScreen players={gameData.players} />}
-      {gameState === "ANNOUNCEMENT" && (
-        <TurnAnnouncement
-          player={gameData.currentPlayer}
-          round={gameData.currentRound}
-          totalRounds={gameData.totalRounds}
-          myPlayerName={myPlayerName}
-        />
-      )}
-      {gameState === "TRIVIA" && (
-        <TriviaScreen
-          key={gameData.currentPlayer?.name || "trivia"}
-          player={gameData.currentPlayer}
-          myPlayerName={myPlayerName}
-          round={gameData.currentRound}
-          questions={gameData.questions}
-        />
-      )}
-      {gameState === "RECAP" && (
-        <RecapScreen
-          turnStats={gameData.turnStats}
-          player={gameData.currentPlayer}
-          myPlayerName={myPlayerName}
-        />
-      )}
-      {gameState === "FINAL" && <FinalScreen players={gameData.finalPlayers} />}
-    </>
+    <Routes>
+      <Route 
+        path="/" 
+        element={
+          <RegistrationScreen
+            setMyPlayerName={setMyPlayerName}
+            myPlayerName={myPlayerName}
+          />
+        } 
+      />
+      <Route 
+        path="/order" 
+        element={<OrderScreen players={gameData.players} totalRounds={gameData.totalRounds} />} 
+      />
+      <Route 
+        path="/announcement" 
+        element={
+          <TurnAnnouncement
+            player={gameData.currentPlayer}
+            round={gameData.currentRound}
+            totalRounds={gameData.totalRounds}
+            myPlayerName={myPlayerName}
+          />
+        } 
+      />
+      <Route 
+        path="/trivia" 
+        element={
+          <TriviaScreen
+            key={gameData.currentPlayer?.name || "trivia"}
+            player={gameData.currentPlayer}
+            myPlayerName={myPlayerName}
+            round={gameData.currentRound}
+            questions={gameData.questions}
+          />
+        } 
+      />
+      <Route 
+        path="/recap" 
+        element={
+          <RecapScreen
+            turnStats={gameData.turnStats}
+            player={gameData.currentPlayer}
+            myPlayerName={myPlayerName}
+          />
+        } 
+      />
+      <Route 
+        path="/attack" 
+        element={
+          <AttackScreen
+            player={gameData.currentPlayer}
+            myPlayerName={myPlayerName}
+          />
+        } 
+      />
+      <Route 
+        path="/final" 
+        element={<FinalScreen players={gameData.finalPlayers} />} 
+      />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <GameNavigator />
+    </BrowserRouter>
   );
 }
 

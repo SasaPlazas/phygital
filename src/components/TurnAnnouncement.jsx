@@ -1,53 +1,76 @@
+import { useEffect } from "react";
 import { socket } from "../socket";
+import { useNavigate } from "react-router-dom";
 import "./TurnAnnouncement.css";
+import avatars from "../avatars";
 
-export default function TurnAnnouncement({ player, round, myPlayerName }) {
-  // Simple, robust comparison
-  const normalize = (str) =>
-    String(str || "")
-      .trim()
-      .toLowerCase();
+export default function TurnAnnouncement({ player, round, totalRounds, myPlayerName }) {
+  const navigate = useNavigate();
 
-  const pName = normalize(player?.name);
-  const myName = normalize(myPlayerName);
+  useEffect(() => {
+    // If player or totalRounds is missing/invalid, redirect to home
+    // This happens if user refreshes the page or server restarts
+    if (!player || !totalRounds) {
+      navigate("/");
+      return;
+    }
 
-  // Check equality to be safe against whitespace
-  const isMyTurn = pName && myName && pName === myName;
+    // Check if it's my turn
+    const normalize = (str) =>
+      String(str || "")
+        .trim()
+        .toLowerCase();
+    const pName = normalize(player?.name);
+    const myName = normalize(myPlayerName);
 
-  const handleStartTrivia = () => {
+    if (pName && myName && pName === myName) {
+      // If it's my turn, automatically proceed to trivia after a short delay
+      // Or we can require a click. The prompt implies "Announcement" -> "Trivia"
+      // Let's add a button for the player to start their turn, or auto-start.
+      // Usually, announcement screens have a "Start Turn" button for the active player.
+    }
+  }, [player, myPlayerName, totalRounds, navigate]);
+
+  const handleStartTurn = () => {
     socket.emit("start_trivia");
   };
 
-  return (
-    <div className="turn-wrapper">
-      <div className="turn-container">
-        <h2 className="round-title">Ronda {round} / 8</h2>
+  const isMyTurn =
+    String(player?.name || "")
+      .trim()
+      .toLowerCase() ===
+    String(myPlayerName || "")
+      .trim()
+      .toLowerCase();
 
-        <div className="player-display">
-          <div
-            className="player-avatar-large"
-            style={{ backgroundColor: player.color }}
-          ></div>
-          <h1 className="player-name-large">{player.name}</h1>
+  return (
+    <div className="announcement-wrapper">
+      <div className="announcement-container">
+        <h1 className="round-title">
+          Ronda {round} / {totalRounds}
+        </h1>
+
+        <div className="player-highlight">
+          <div className="avatar-wrapper">
+            <img 
+              src={avatars[player?.avatarIndex]} 
+              alt={`Avatar ${player?.name}`}
+              className="avatar-image"
+            />
+          </div>
+          <h2 className="player-name-large">{player?.name}</h2>
         </div>
 
-        <p className="turn-instruction">
-          {isMyTurn ? "Es tu turno" : `Es el turno de ${player.name}`}
+        <p className="turn-message">
+          {isMyTurn ? "¡Es tu turno!" : `Turno de ${player?.name}`}
         </p>
 
-        {isMyTurn ? (
-          <button className="start-trivia-button" onClick={handleStartTrivia}>
-            Iniciar trivia
+        {isMyTurn && (
+          <button className="start-turn-button" onClick={handleStartTurn}>
+            Comenzar Trivia
           </button>
-        ) : (
-          <div style={{ textAlign: "center", width: "100%" }}>
-            <p className="waiting-message">Esperando a que inicie...</p>
-            {/* If names look similar but strict check failed, show button anyway? 
-                Actually, the 'includes' check above handles that. 
-                If we are here, names are truly different. 
-            */}
-          </div>
         )}
+        {!isMyTurn && <p className="waiting-message">Esperando que el jugador comience...</p>}
       </div>
     </div>
   );

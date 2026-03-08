@@ -4,7 +4,7 @@ import "./TriviaScreen.css";
 
 export default function TriviaScreen({ player, myPlayerName, questions = [] }) {
   // 1. State Initialization
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
+  const [timeLeft, setTimeLeft] = useState(60); // 1 minute
   const [score, setScore] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);

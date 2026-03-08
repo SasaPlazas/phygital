@@ -1,5 +1,6 @@
 import "./OrderScreen.css";
 import { socket } from "../socket";
+import avatars from "../avatars";
 
 export default function OrderScreen({ players, totalRounds }) {
   const handleStartRounds = () => {
@@ -17,10 +18,11 @@ export default function OrderScreen({ players, totalRounds }) {
             {players.map((player, index) => (
               <div key={index} className="player-card">
                 <span className="player-number">{index + 1}</span>
-                <div
-                  className="player-avatar"
-                  style={{ backgroundColor: player.color }}
-                ></div>
+                <img 
+                  src={avatars[player.avatarIndex]} 
+                  alt={`Avatar ${player.name}`}
+                  className="player-avatar-img"
+                />
                 <span className="player-name">{player.name}</span>
               </div>
             ))}
@@ -33,15 +35,20 @@ export default function OrderScreen({ players, totalRounds }) {
             <p>
               • {players.length} Jugadores → {totalRounds} Rondas
             </p>
-            <p>• 2 minutos para trivia</p>
+            <p>• 1 minuto para trivia</p>
             <p>• 1 acierto = 1 soldado</p>
             <p>• Movimientos = tiempo restante / 5 segundos</p>
           </div>
         </div>
 
-        <button className="start-rounds-button" onClick={handleStartRounds}>
-          Iniciar rondas
-        </button>
+        <div className="buttons-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+          <button className="reset-button" onClick={() => socket.emit("game_reset")} style={{ backgroundColor: 'transparent', color: '#6b7280', border: '1px solid #d1d5db' }}>
+            Reiniciar Partida
+          </button>
+          <button className="start-rounds-button" onClick={handleStartRounds}>
+            Iniciar rondas
+          </button>
+        </div>
       </div>
     </div>
   );

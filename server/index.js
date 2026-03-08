@@ -45,16 +45,6 @@ const shuffleArray = (array) => {
   return array;
 };
 
-// Helper to generate random color
-const getRandomColor = () => {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
-
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
@@ -114,9 +104,19 @@ io.on("connection", (socket) => {
       ];
     }
 
-    orderedPlayers = shuffledPlayers.map((name) => ({
+    // Shuffle avatar indices to assign random avatars
+    const avatarIndices = [0, 1, 2, 3];
+    for (let i = avatarIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [avatarIndices[i], avatarIndices[j]] = [
+        avatarIndices[j],
+        avatarIndices[i],
+      ];
+    }
+
+    orderedPlayers = shuffledPlayers.map((name, index) => ({
       name,
-      color: getRandomColor(),
+      avatarIndex: avatarIndices[index % 4], // Assign random unique avatar
       score: 0,
     }));
 
@@ -137,6 +137,8 @@ io.on("connection", (socket) => {
 
   // Start Rounds (Go to Turn Announcement)
   socket.on("start_rounds", () => {
+    if (!gameStarted || orderedPlayers.length === 0) return;
+
     // Emit info for the first player of the first round
     const currentPlayer = orderedPlayers[currentPlayerIndex];
     io.emit("turn_announcement", {
@@ -225,6 +227,14 @@ io.on("connection", (socket) => {
       soldiers,
       movements,
       correctAnswers,
+    });
+  });
+
+  // Handle request to start attack phase
+  socket.on("start_attack_phase", () => {
+    const currentPlayer = orderedPlayers[currentPlayerIndex];
+    io.emit("attack_started", {
+      player: currentPlayer,
     });
   });
 
