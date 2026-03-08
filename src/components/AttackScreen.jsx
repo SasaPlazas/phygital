@@ -72,6 +72,9 @@ export default function AttackScreen({ player, myPlayerName }) {
         </div>
 
         <p className="instruction-text">¡Muévete y Ataca!</p>
+        <h3 className="attack-instruction">
+          Posiciona tus Soldados.
+        </h3>
 
         {isMyTurn && (
           <button className="finish-turn-button" onClick={handleFinishTurn}>
