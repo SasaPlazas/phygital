@@ -36,6 +36,10 @@ let usedQuestionIndices = {
   hard: new Set(),
 };
 
+// Track indices sent to current player to mark as used only after turn ends
+let currentTurnIndices = [];
+let currentTurnCategory = "easy";
+
 // Helper to shuffle array (Fisher-Yates)
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
@@ -181,23 +185,80 @@ io.on("connection", (socket) => {
     // Select up to 20 questions
     const selectedIndices = shuffledIndices.slice(0, 20);
 
-    // Mark selected as used
-    selectedIndices.forEach((index) =>
-      usedQuestionIndices[category].add(index)
-    );
+    // Store for marking as used later (in end_turn)
+    currentTurnIndices = selectedIndices;
+    currentTurnCategory = category;
 
     // Get the actual question objects
     const turnQuestions = selectedIndices.map(
       (index) => sourceQuestions[index]
     );
 
+    console.log(
+      `Sending ${
+        turnQuestions.length
+      } questions for category ${category}. Indices: ${selectedIndices.join(
+        ","
+      )}`
+    );
+
     // Send questions to the client
-    io.emit("trivia_started", { questions: turnQuestions });
+    io.emit("trivia_started", {
+      questions: turnQuestions,
+      indices: selectedIndices,
+    });
   });
 
   // Handle end of turn (after trivia)
   socket.on("end_turn", (data) => {
-    const { correctAnswers, timeLeft } = data;
+    const { correctAnswers, timeLeft, questionsSeen, usedIndices, category } =
+      data;
+
+    // Determine category: prefer client's reported category, fallback to server's tracking
+    const targetCategory = category || currentTurnCategory;
+
+    console.log(
+      `Received end_turn. Questions seen: ${questionsSeen}, Category: ${targetCategory}`
+    );
+
+    // Mark questions as used based on client report (more robust) or server tracking (fallback)
+    let indicesToMark = [];
+
+    if (usedIndices && Array.isArray(usedIndices) && usedIndices.length > 0) {
+      indicesToMark = usedIndices;
+      console.log(`Using client-provided indices: ${indicesToMark.length}`);
+    } else if (questionsSeen && currentTurnIndices.length > 0) {
+      // Fallback: Ensure we don't exceed the number of sent questions
+      const count = Math.min(questionsSeen, currentTurnIndices.length);
+      indicesToMark = currentTurnIndices.slice(0, count);
+      console.log(
+        `Using server-tracked indices (fallback): ${indicesToMark.length}`
+      );
+    }
+
+    if (indicesToMark.length > 0) {
+      // Ensure the category exists in our tracking set
+      if (!usedQuestionIndices[targetCategory]) {
+        console.warn(
+          `Warning: Category ${targetCategory} not found in usedQuestionIndices. Initializing.`
+        );
+        usedQuestionIndices[targetCategory] = new Set();
+      }
+
+      indicesToMark.forEach((index) => {
+        usedQuestionIndices[targetCategory].add(index);
+      });
+      console.log(
+        `Marked ${
+          indicesToMark.length
+        } questions as used for category ${targetCategory}. Total used: ${
+          usedQuestionIndices[targetCategory].size
+        }. Indices: ${indicesToMark.join(",")}`
+      );
+    } else {
+      console.log("No questions marked as used (missing data)");
+    }
+
     const soldiers = correctAnswers; // 1 soldier per correct answer
     const movements = Math.floor(timeLeft / 5); // 1 movement per 5s remaining
 

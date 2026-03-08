@@ -2,7 +2,13 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { socket } from "../socket";
 import "./TriviaScreen.css";
 
-export default function TriviaScreen({ player, myPlayerName, questions = [] }) {
+export default function TriviaScreen({
+  player,
+  myPlayerName,
+  questions = [],
+  questionIndices = [],
+  round = 1,
+}) {
   // 1. State Initialization
   const [timeLeft, setTimeLeft] = useState(60); // 1 minute
   const [score, setScore] = useState(0);
@@ -44,11 +50,30 @@ export default function TriviaScreen({ player, myPlayerName, questions = [] }) {
     hasEndedTurnRef.current = true;
     setIsPaused(true);
 
+    // Calculate questions seen
+    // currentQuestionIndex is 0-based index of the question currently displayed
+    // So if index is 2, we have seen 0, 1, and 2 (total 3)
+    const questionsSeen = currentQuestionIndex + 1;
+
+    // Calculate used indices to send back to server (robustness against server restarts)
+    let usedIndices = [];
+    if (questionIndices && questionIndices.length > 0) {
+      const count = Math.min(questionsSeen, questionIndices.length);
+      usedIndices = questionIndices.slice(0, count);
+    }
+
+    let category = "easy";
+    if (round >= 3 && round <= 5) category = "medium";
+    if (round >= 6) category = "hard";
+
     socket.emit("end_turn", {
       correctAnswers: scoreRef.current,
       timeLeft: timeLeftRef.current,
+      questionsSeen: questionsSeen,
+      usedIndices: usedIndices,
+      category: category,
     });
-  }, [isMyTurn]); // Stable callback
+  }, [isMyTurn, currentQuestionIndex, questionIndices, round]); // Added round dependency
 
   // Timer Effect - Robust Date.now() based
   useEffect(() => {

@@ -22,6 +22,7 @@ function GameNavigator() {
     turnStats: { soldiers: 0, movements: 0 },
     finalPlayers: [],
     questions: [],
+    questionIndices: [],
   });
 
   const [myPlayerName, setMyPlayerName] = useState(() => {
@@ -63,6 +64,7 @@ function GameNavigator() {
       setGameData((prev) => ({
         ...prev,
         questions: data.questions,
+        questionIndices: data.indices || [],
       }));
       setGameState("TRIVIA");
       navigate("/trivia");
@@ -135,21 +137,26 @@ function GameNavigator() {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
           <RegistrationScreen
             setMyPlayerName={setMyPlayerName}
             myPlayerName={myPlayerName}
           />
-        } 
+        }
       />
-      <Route 
-        path="/order" 
-        element={<OrderScreen players={gameData.players} totalRounds={gameData.totalRounds} />} 
+      <Route
+        path="/order"
+        element={
+          <OrderScreen
+            players={gameData.players}
+            totalRounds={gameData.totalRounds}
+          />
+        }
       />
-      <Route 
-        path="/announcement" 
+      <Route
+        path="/announcement"
         element={
           <TurnAnnouncement
             player={gameData.currentPlayer}
@@ -157,10 +164,10 @@ function GameNavigator() {
             totalRounds={gameData.totalRounds}
             myPlayerName={myPlayerName}
           />
-        } 
+        }
       />
-      <Route 
-        path="/trivia" 
+      <Route
+        path="/trivia"
         element={
           <TriviaScreen
             key={gameData.currentPlayer?.name || "trivia"}
@@ -168,31 +175,32 @@ function GameNavigator() {
             myPlayerName={myPlayerName}
             round={gameData.currentRound}
             questions={gameData.questions}
+            questionIndices={gameData.questionIndices}
           />
-        } 
+        }
       />
-      <Route 
-        path="/recap" 
+      <Route
+        path="/recap"
         element={
           <RecapScreen
             turnStats={gameData.turnStats}
             player={gameData.currentPlayer}
             myPlayerName={myPlayerName}
           />
-        } 
+        }
       />
-      <Route 
-        path="/attack" 
+      <Route
+        path="/attack"
         element={
           <AttackScreen
             player={gameData.currentPlayer}
             myPlayerName={myPlayerName}
           />
-        } 
+        }
       />
-      <Route 
-        path="/final" 
-        element={<FinalScreen players={gameData.finalPlayers} />} 
+      <Route
+        path="/final"
+        element={<FinalScreen players={gameData.finalPlayers} />}
       />
     </Routes>
   );
