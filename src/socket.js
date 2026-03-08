@@ -4,6 +4,10 @@ import { io } from "socket.io-client";
 // This allows it to work on mobile when accessing via IP address
 const URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
 
+// Log to help debug connection issues in production
+console.log("Socket initializing...");
+console.log("Environment mode:", import.meta.env.MODE);
+console.log("VITE_API_URL configured:", import.meta.env.VITE_API_URL ? "Yes" : "No");
 console.log("Socket connecting to:", URL);
 
 let socket;
