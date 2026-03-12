@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import RegistrationScreen from "./components/RegistrationScreen";
+import StartScreen from "./components/StartScreen";
 import OrderScreen from "./components/OrderScreen";
 import TurnAnnouncement from "./components/TurnAnnouncement";
 import TriviaScreen from "./components/TriviaScreen";
@@ -146,6 +147,10 @@ function GameNavigator() {
     <Routes>
       <Route
         path="/"
+        element={<StartScreen />}
+      />
+      <Route
+        path="/register"
         element={
           <RegistrationScreen
             setMyPlayerName={setMyPlayerName}
