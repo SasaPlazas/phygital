@@ -74,11 +74,11 @@
 
 .winner-score {
   font-size: 1.2rem;
-  color: #4b5563;
+  color: #fcd34d;
 }
 
 .instructions-box {
-  background-color: #e5e7eb;
+  background-color: none;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 2rem;
@@ -128,7 +128,7 @@
 }
 
 .reset-button {
-  background-color: #d4d4d8;
+  background-color: #fcd34d;
   color: #1f2937;
   border: none;
   padding: 1rem 3rem;
@@ -140,5 +140,5 @@
 }
 
 .reset-button:hover {
-  background-color: #9ca3af;
+  background-color: #e2ba35;
 }

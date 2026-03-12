@@ -62,7 +62,6 @@ export default function AttackScreen({ player, myPlayerName, attackEndsAt }) {
   return (
     <div className="attack-wrapper">
       <div className="attack-container">
-        <h1 className="attack-title">Fase de Ataque y Movimiento</h1>
 
         <div className="player-highlight">
           <div className="avatar-wrapper">
@@ -81,7 +80,7 @@ export default function AttackScreen({ player, myPlayerName, attackEndsAt }) {
         </div>
 
         <p className="instruction-text">¡Muévete y Ataca!</p>
-        <h3 className="attack-instruction">Posiciona tus Soldados.</h3>
+        <h3 className="attack-instruction">Posiciona tus Soldados o dona a tus aliados</h3>
 
         {isMyTurn && (
           <button className="finish-turn-button" onClick={handleFinishTurn}>

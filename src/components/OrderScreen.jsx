@@ -14,7 +14,6 @@ export default function OrderScreen({ players, totalRounds }) {
         <img className="order-logo" src={logo} alt="HexArena" />
 
         <div className="players-grid-container">
-          <h2 className="section-title">Jugadores</h2>
           <div className="players-grid">
             {players.map((player, index) => (
               <div key={index} className="player-card">
@@ -43,14 +42,14 @@ export default function OrderScreen({ players, totalRounds }) {
         </div>
 
         <div className="buttons-container">
+          <button className="start-rounds-button" onClick={handleStartRounds}>
+            Iniciar rondas
+          </button>
           <button
             className="reset-button"
             onClick={() => socket.emit("game_reset")}
           >
             Reiniciar Partida
-          </button>
-          <button className="start-rounds-button" onClick={handleStartRounds}>
-            Iniciar rondas
           </button>
         </div>
       </div>

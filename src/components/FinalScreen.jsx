@@ -3,7 +3,7 @@ import "./FinalScreen.css";
 
 export default function FinalScreen() {
   const handleReset = () => {
-    socket.emit("reset_game");
+    socket.emit("game_reset");
   };
 
   // Sort players by soldiers (optional, to show winner)
