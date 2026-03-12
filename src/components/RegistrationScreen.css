@@ -4,33 +4,49 @@
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background-color: #242424; /* Dark theme background */
+  background-image: radial-gradient(
+      900px 600px at 50% 40%,
+      var(--app-bg) 0%,
+      var(--app-bg-2) 100%
+    ),
+    var(--app-bg-pattern);
+  background-position: center, center;
+  background-repeat: no-repeat, repeat;
+  background-size: auto, var(--app-bg-pattern-size);
+  background-blend-mode: normal, multiply;
+  padding: 2rem 1rem;
 }
 
 .registration-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2.5rem;
+  padding: 2.6rem 2.2rem;
   width: 100%;
   max-width: 450px;
   gap: 1.5rem;
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  color: #333;
+  background-color: var(--panel);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  color: var(--text);
 }
 
-h1 {
+.brand-logo {
+  width: min(320px, 85%);
+  height: auto;
+  margin-bottom: 0.25rem;
+}
+
+.registration-container h1 {
   font-size: 2rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin: 0;
   text-align: center;
 }
 
 .subtitle {
-  color: #666;
-  margin-top: -1rem;
+  color: var(--muted);
+  margin-top: -1.1rem;
   font-size: 0.95rem;
 }
 
@@ -41,30 +57,30 @@ h1 {
   position: relative;
 }
 
-input {
+.registration-container input {
   flex: 1;
   padding: 0.8rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.2s;
-  background-color: #f9fafb;
-  color: #1a1a1a; /* Fix for invisible text in dark mode */
+  background-color: var(--panel-2);
+  color: var(--text);
 }
 
-input:focus {
+.registration-container input:focus {
   outline: none;
-  border-color: #646cff;
-  background-color: #fff;
-  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+  border-color: rgba(59, 42, 26, 0.35);
+  background-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 3px rgba(242, 183, 79, 0.25);
 }
 
 .add-button {
-  background-color: #646cff;
-  color: white;
+  background-color: var(--accent);
+  color: var(--accent-text);
   border: none;
-  border-radius: 10px;
-  width: 50px;
+  border-radius: 12px;
+  width: 54px;
   font-size: 1.8rem;
   cursor: pointer;
   display: flex;
@@ -72,10 +88,11 @@ input:focus {
   justify-content: center;
   transition: background-color 0.2s, transform 0.1s;
   padding-bottom: 4px; /* Visual alignment for + sign */
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
 }
 
 .add-button:hover {
-  background-color: #535bf2;
+  background-color: var(--accent-pressed);
 }
 
 .add-button:active {
@@ -91,7 +108,7 @@ input:focus {
 
 .players-list-container h3 {
   font-size: 1rem;
-  color: #4b5563;
+  color: var(--muted);
   margin: 0;
   font-weight: 600;
 }
@@ -103,27 +120,27 @@ input:focus {
 }
 
 .player-tag {
-  background-color: #f3f4f6;
+  background-color: rgba(255, 255, 255, 0.35);
   padding: 0.5rem 0.8rem;
   border-radius: 20px;
   font-size: 0.9rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .player-tag.is-me {
-  background-color: #eff6ff;
-  border-color: #bfdbfe;
-  color: #1e40af;
+  background-color: rgba(242, 183, 79, 0.22);
+  border-color: rgba(242, 183, 79, 0.55);
+  color: var(--text);
 }
 
 .remove-player-btn {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: rgba(59, 42, 26, 0.45);
   cursor: pointer;
   font-size: 1.2rem;
   padding: 0;
@@ -137,34 +154,34 @@ input:focus {
 }
 
 .remove-player-btn:hover {
-  background-color: #fee2e2;
-  color: #ef4444;
+  background-color: rgba(59, 42, 26, 0.08);
+  color: rgba(59, 42, 26, 0.7);
 }
 
 .start-button {
   width: 100%;
   padding: 1rem;
-  background-color: #10b981;
-  color: white;
+  background-color: var(--accent);
+  color: var(--accent-text);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 1rem;
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
 }
 
 .start-button:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: var(--accent-pressed);
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
 }
 
 .start-button:disabled {
-  background-color: #d1d5db;
+  background-color: rgba(59, 42, 26, 0.18);
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.55;
 }
 
 .limit-message {
@@ -174,14 +191,14 @@ input:focus {
 }
 
 .hint-message {
-  color: #f59e0b;
+  color: rgba(59, 42, 26, 0.7);
   font-size: 0.9rem;
   margin: 0;
   text-align: center;
 }
 
 .empty-message {
-  color: #9ca3af;
+  color: rgba(59, 42, 26, 0.45);
   font-style: italic;
   font-size: 0.9rem;
 }
@@ -196,20 +213,20 @@ input:focus {
 
 .registered-message {
   font-size: 1.1rem;
-  color: #059669; /* Green-600 */
-  background-color: #d1fae5; /* Green-100 */
+  color: var(--text);
+  background-color: rgba(255, 255, 255, 0.35);
   padding: 0.8rem 1.2rem;
   border-radius: 8px;
   width: 100%;
   text-align: center;
   margin: 0;
-  border: 1px solid #a7f3d0;
+  border: 1px solid var(--border);
 }
 
 .change-player-button {
   background-color: transparent;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
+  color: rgba(59, 42, 26, 0.75);
+  border: 1px solid var(--border);
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -218,7 +235,7 @@ input:focus {
 }
 
 .change-player-button:hover {
-  background-color: #f3f4f6;
-  color: #374151;
-  border-color: #9ca3af;
+  background-color: rgba(59, 42, 26, 0.06);
+  color: var(--text);
+  border-color: rgba(59, 42, 26, 0.3);
 }

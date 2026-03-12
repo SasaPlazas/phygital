@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { socket } from "../socket";
+import logo from "../assets/HexArena.png";
 import "./RegistrationScreen.css";
 
 export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
@@ -72,6 +73,7 @@ export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
   return (
     <div className="registration-wrapper">
       <div className="registration-container">
+        <img className="brand-logo" src={logo} alt="HexArena" />
         <h1>Registro de Jugadores</h1>
         <p className="subtitle">
           {isConnected ? "Conectado en tiempo real" : "Conectando..."}

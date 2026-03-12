@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { socket } from "../socket";
 import "./TriviaScreen.css";
 
@@ -165,6 +165,41 @@ export default function TriviaScreen({
   };
 
   // 6. Waiting Screen (if not my turn)
+  const currentQuestion = questions?.[currentQuestionIndex];
+  const shuffledAnswers = useMemo(() => {
+    const answers = currentQuestion?.answers;
+    if (!answers || answers.length === 0) return [];
+
+    const base =
+      String(currentQuestion?.question || "") +
+      "|" +
+      String(currentQuestion?.correctAnswer || "") +
+      "|" +
+      String(currentQuestionIndex);
+
+    let seed = 2166136261;
+    for (let i = 0; i < base.length; i++) {
+      seed ^= base.charCodeAt(i);
+      seed = Math.imul(seed, 16777619);
+    }
+
+    let t = seed >>> 0;
+    const rand = () => {
+      t += 0x6d2b79f5;
+      let x = t;
+      x = Math.imul(x ^ (x >>> 15), x | 1);
+      x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+
+    const arr = [...answers];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, [currentQuestion, currentQuestionIndex]);
+
   if (!isMyTurn) {
     return (
       <div className="trivia-wrapper">
@@ -180,8 +215,6 @@ export default function TriviaScreen({
   // 7. Loading state if questions aren't ready
   if (!questions || questions.length === 0)
     return <div>Cargando preguntas...</div>;
-
-  const currentQuestion = questions[currentQuestionIndex];
 
   // 8. Main Render
   return (
@@ -201,7 +234,7 @@ export default function TriviaScreen({
         </div>
 
         <div className="answers-grid">
-          {currentQuestion.answers.map((answer, index) => {
+          {shuffledAnswers.map((answer, index) => {
             let buttonClass = "answer-button notranslate";
             // Highlight selected answer
             if (selectedAnswer === answer) {

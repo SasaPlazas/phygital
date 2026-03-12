@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { socket } from "../socket";
 import "./RecapScreen.css";
 import avatars from "../avatars";
 
@@ -12,13 +10,9 @@ export default function RecapScreen({ turnStats, player, myPlayerName }) {
       .trim()
       .toLowerCase();
 
-  const [isNavigating, setIsNavigating] = useState(false);
-
-  const handleNextPhase = () => {
-    if (isNavigating) return;
-    setIsNavigating(true);
-    socket.emit("start_attack_phase");
-  };
+  const safeAvatarIndex = Number.isInteger(player?.avatarIndex)
+    ? player.avatarIndex
+    : 0;
 
   return (
     <div className="recap-wrapper">
@@ -28,8 +22,8 @@ export default function RecapScreen({ turnStats, player, myPlayerName }) {
         <div className="player-highlight">
           <div className="avatar-wrapper">
             <img
-              src={avatars[player?.avatarIndex]}
-              alt={`Avatar ${player?.name}`}
+              src={avatars[safeAvatarIndex]}
+              alt={player?.name ? `Avatar ${player.name}` : "Avatar"}
               className="avatar-image"
             />
           </div>
@@ -47,18 +41,11 @@ export default function RecapScreen({ turnStats, player, myPlayerName }) {
           </div>
         </div>
 
-        {isMyTurn && (
-          <button
-            className="next-turn-button"
-            onClick={handleNextPhase}
-            disabled={isNavigating}
-          >
-            {isNavigating ? "Cargando..." : "Ir a Fase de Ataque"}
-          </button>
-        )}
-        {!isMyTurn && (
-          <p className="waiting-message">Esperando al siguiente turno...</p>
-        )}
+        <p className="waiting-message">
+          {isMyTurn
+            ? "Iniciando fase de ataque..."
+            : "Iniciando fase de ataque..."}
+        </p>
       </div>
     </div>
   );

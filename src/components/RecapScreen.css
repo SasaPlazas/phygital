@@ -4,8 +4,18 @@
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background-color: #f5f5f5;
-  color: #333;
+  background-image: radial-gradient(
+      900px 600px at 50% 40%,
+      var(--app-bg) 0%,
+      var(--app-bg-2) 100%
+    ),
+    var(--app-bg-pattern);
+  background-position: center, center;
+  background-repeat: no-repeat, repeat;
+  background-size: auto, var(--app-bg-pattern-size);
+  background-blend-mode: normal, multiply;
+  color: var(--text);
+  padding: 2rem 1rem;
 }
 
 .recap-container {
@@ -15,16 +25,16 @@
   padding: 3rem;
   width: 90%;
   max-width: 600px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: var(--panel);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
   text-align: center;
 }
 
 .recap-title {
   font-size: 1.8rem;
   margin-bottom: 2rem;
-  color: #1f2937;
+  color: var(--text);
   word-break: break-word;
 }
 
@@ -37,8 +47,8 @@
 }
 
 .avatar-wrapper {
-  width: 300px;
-  height: 300px;
+  width: clamp(140px, 38vw, 240px);
+  height: clamp(140px, 38vw, 240px);
   /* Removed border and border-radius */
   overflow: visible; /* Allow image to be fully seen */
   margin-bottom: 2rem;
@@ -53,13 +63,12 @@
   width: 100%;
   height: 100%;
   object-fit: contain; /* Ensure the whole image is visible without cropping */
-  transform: scale(1.2); /* Slight scale up for impact */
 }
 
 .player-name-large {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text);
   margin: 0;
   word-break: break-word;
 }
@@ -108,11 +117,11 @@
     font-size: 1.8rem;
     margin-bottom: 0.1rem;
   }
-  
+
   .stat-label {
     font-size: 0.75rem;
   }
-  
+
   .next-turn-button {
     padding: 0.8rem 2rem;
     font-size: 1rem;
@@ -141,7 +150,7 @@
 }
 
 .stat-card {
-  background-color: #e5e7eb;
+  background-color: rgba(255, 255, 255, 0.35);
   padding: 1.5rem 1rem;
   border-radius: 12px;
   display: flex;
@@ -151,19 +160,20 @@
   overflow: hidden;
   min-height: 140px; /* Reduced from 200px */
   justify-content: center;
+  border: 1px solid var(--border);
 }
 
 .stat-value {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #111827;
+  color: var(--text);
   z-index: 2;
   margin-bottom: 0.2rem;
 }
 
 .stat-label {
   font-size: 0.9rem;
-  color: #4b5563;
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 1px;
   z-index: 2;
@@ -173,7 +183,7 @@
 .stat-icon {
   width: 100%;
   height: 6px;
-  background-color: #9ca3af;
+  background-color: rgba(59, 42, 26, 0.3);
   position: absolute;
   bottom: 0;
   left: 0;
@@ -193,28 +203,28 @@
 }
 
 .next-turn-button {
-  background-color: #3b82f6;
-  color: white;
+  background-color: var(--accent);
+  color: var(--accent-text);
   border: none;
   padding: 1rem 3rem;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1.2rem;
   cursor: pointer;
   transition: background-color 0.2s;
   font-weight: 600;
   width: 100%;
   max-width: 300px;
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
 }
 
 .next-turn-button:hover {
-  background-color: #2563eb;
+  background-color: var(--accent-pressed);
   transform: translateY(-2px);
-  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.6);
 }
 
 .waiting-message {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: var(--muted);
   font-style: italic;
   margin-top: 1rem;
 }

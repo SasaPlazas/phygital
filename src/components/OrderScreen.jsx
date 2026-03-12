@@ -1,6 +1,7 @@
 import "./OrderScreen.css";
 import { socket } from "../socket";
 import avatars from "../avatars";
+import logo from "../assets/HexArena.png";
 
 export default function OrderScreen({ players, totalRounds }) {
   const handleStartRounds = () => {
@@ -10,7 +11,7 @@ export default function OrderScreen({ players, totalRounds }) {
   return (
     <div className="order-wrapper">
       <div className="order-container">
-        <h1>NOMBRE DEL JUEGO</h1>
+        <img className="order-logo" src={logo} alt="HexArena" />
 
         <div className="players-grid-container">
           <h2 className="section-title">Jugadores</h2>
@@ -18,8 +19,8 @@ export default function OrderScreen({ players, totalRounds }) {
             {players.map((player, index) => (
               <div key={index} className="player-card">
                 <span className="player-number">{index + 1}</span>
-                <img 
-                  src={avatars[player.avatarIndex]} 
+                <img
+                  src={avatars[player.avatarIndex]}
                   alt={`Avatar ${player.name}`}
                   className="player-avatar-img"
                 />
@@ -41,8 +42,11 @@ export default function OrderScreen({ players, totalRounds }) {
           </div>
         </div>
 
-        <div className="buttons-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
-          <button className="reset-button" onClick={() => socket.emit("game_reset")} style={{ backgroundColor: 'transparent', color: '#6b7280', border: '1px solid #d1d5db' }}>
+        <div className="buttons-container">
+          <button
+            className="reset-button"
+            onClick={() => socket.emit("game_reset")}
+          >
             Reiniciar Partida
           </button>
           <button className="start-rounds-button" onClick={handleStartRounds}>

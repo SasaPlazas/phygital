@@ -4,8 +4,18 @@
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background-color: #f5f5f5; /* Light background as per design */
-  color: #333;
+  background-image: radial-gradient(
+      900px 600px at 50% 40%,
+      var(--app-bg) 0%,
+      var(--app-bg-2) 100%
+    ),
+    var(--app-bg-pattern);
+  background-position: center, center;
+  background-repeat: no-repeat, repeat;
+  background-size: auto, var(--app-bg-pattern-size);
+  background-blend-mode: normal, multiply;
+  color: var(--text);
+  padding: 2rem 1rem;
 }
 
 .order-container {
@@ -15,17 +25,15 @@
   padding: 2rem;
   width: 100%;
   max-width: 800px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: var(--panel);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
 }
 
-h1 {
-  font-size: 1.5rem;
-  text-transform: uppercase;
-  margin-bottom: 2rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+.order-logo {
+  width: min(360px, 90%);
+  height: auto;
+  margin-bottom: 1.6rem;
 }
 
 .section-title {
@@ -50,17 +58,18 @@ h1 {
 .player-card {
   display: flex;
   align-items: center;
-  background-color: #e5e7eb;
+  background-color: rgba(255, 255, 255, 0.35);
   padding: 0.8rem 1rem;
   border-radius: 30px; /* Pill shape */
   gap: 1rem;
+  border: 1px solid var(--border);
 }
 
 .player-number {
   font-size: 2rem;
   font-weight: 400;
   line-height: 1;
-  color: #333;
+  color: var(--text);
 }
 
 .player-avatar-img {
@@ -69,8 +78,8 @@ h1 {
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  border: 2px solid #e5e7eb;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
   background-color: transparent;
 }
 
@@ -83,12 +92,13 @@ h1 {
 }
 
 .game-info-box {
-  background-color: #d1d5db;
+  background-color: rgba(255, 255, 255, 0.35);
   width: 100%;
   padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
   text-align: center;
+  border: 1px solid var(--border);
 }
 
 .info-text {
@@ -100,26 +110,52 @@ h1 {
   text-align: left;
   display: inline-block;
   font-size: 0.9rem;
-  color: #4b5563;
+  color: rgba(59, 42, 26, 0.75);
 }
 
 .rules-list p {
   margin: 0.3rem 0;
 }
 
+.buttons-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.reset-button {
+  background-color: transparent;
+  color: rgba(59, 42, 26, 0.75);
+  border: 1px solid var(--border);
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.reset-button:hover {
+  background-color: rgba(59, 42, 26, 0.06);
+  border-color: rgba(59, 42, 26, 0.3);
+}
+
 .start-rounds-button {
-  background-color: #d4d4d8; /* Light gray button */
-  color: #1f2937;
+  background-color: var(--accent);
+  color: var(--accent-text);
   border: none;
   padding: 0.8rem 3rem;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
 }
 
 .start-rounds-button:hover {
-  background-color: #9ca3af;
+  background-color: var(--accent-pressed);
 }

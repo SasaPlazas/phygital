@@ -3,8 +3,11 @@ import { socket } from "../socket";
 import "./AttackScreen.css";
 import avatars from "../avatars";
 
-export default function AttackScreen({ player, myPlayerName }) {
+export default function AttackScreen({ player, myPlayerName, attackEndsAt }) {
   const [timeLeft, setTimeLeft] = useState(60); // 1 minute to attack/move
+  const safeAvatarIndex = Number.isInteger(player?.avatarIndex)
+    ? player.avatarIndex
+    : 0;
 
   const isMyTurn =
     String(player?.name || "")
@@ -17,26 +20,32 @@ export default function AttackScreen({ player, myPlayerName }) {
   const hasEmittedRef = useRef(false);
 
   useEffect(() => {
-    if (!isMyTurn) return;
+    hasEmittedRef.current = false;
+    if (attackEndsAt && Number.isFinite(attackEndsAt)) {
+      const update = () => {
+        const remaining = Math.max(
+          0,
+          Math.ceil((attackEndsAt - Date.now()) / 1000)
+        );
+        setTimeLeft(remaining);
+      };
+      const first = setTimeout(update, 0);
+      const interval = setInterval(update, 250);
+      return () => {
+        clearTimeout(first);
+        clearInterval(interval);
+      };
+    }
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          if (!hasEmittedRef.current) {
-            hasEmittedRef.current = true;
-            setTimeout(() => {
-              socket.emit("next_turn_request");
-            }, 0);
-          }
-          return 0;
-        }
+        if (prev <= 1) return 0;
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isMyTurn]);
+  }, [attackEndsAt, player?.name]);
 
   const handleFinishTurn = () => {
     if (hasEmittedRef.current) return;
@@ -58,8 +67,8 @@ export default function AttackScreen({ player, myPlayerName }) {
         <div className="player-highlight">
           <div className="avatar-wrapper">
             <img
-              src={avatars[player?.avatarIndex]}
-              alt={`Avatar ${player?.name}`}
+              src={avatars[safeAvatarIndex]}
+              alt={player?.name ? `Avatar ${player.name}` : "Avatar"}
               className="avatar-image"
             />
           </div>
@@ -72,9 +81,7 @@ export default function AttackScreen({ player, myPlayerName }) {
         </div>
 
         <p className="instruction-text">¡Muévete y Ataca!</p>
-        <h3 className="attack-instruction">
-          Posiciona tus Soldados.
-        </h3>
+        <h3 className="attack-instruction">Posiciona tus Soldados.</h3>
 
         {isMyTurn && (
           <button className="finish-turn-button" onClick={handleFinishTurn}>
@@ -83,7 +90,7 @@ export default function AttackScreen({ player, myPlayerName }) {
         )}
         {!isMyTurn && (
           <p className="waiting-message">
-            Esperando a que {player?.name} termine su turno...
+            Esperando a que {player?.name || "el jugador"} termine su turno...
           </p>
         )}
       </div>

@@ -39,6 +39,8 @@ let usedQuestionIndices = {
 // Track indices sent to current player to mark as used only after turn ends
 let currentTurnIndices = [];
 let currentTurnCategory = "easy";
+let attackPhaseTimeoutId = null;
+let attackTurnTimeoutId = null;
 
 // Helper to shuffle array (Fisher-Yates)
 const shuffleArray = (array) => {
@@ -51,6 +53,49 @@ const shuffleArray = (array) => {
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
+
+  const advanceTurn = () => {
+    currentPlayerIndex++;
+    if (currentPlayerIndex >= orderedPlayers.length) {
+      currentPlayerIndex = 0;
+      currentRound++;
+    }
+
+    if (currentRound > totalRounds) {
+      io.emit("game_over", {
+        players: orderedPlayers,
+        history: gameHistory,
+      });
+      return;
+    }
+
+    const nextPlayer = orderedPlayers[currentPlayerIndex];
+    io.emit("turn_announcement", {
+      player: nextPlayer,
+      round: currentRound,
+      totalRounds,
+    });
+  };
+
+  const startAttackPhaseNow = () => {
+    if (attackTurnTimeoutId) {
+      clearTimeout(attackTurnTimeoutId);
+      attackTurnTimeoutId = null;
+    }
+
+    const currentPlayer = orderedPlayers[currentPlayerIndex];
+    const endsAt = Date.now() + 60_000;
+
+    io.emit("attack_started", {
+      player: currentPlayer,
+      endsAt,
+    });
+
+    attackTurnTimeoutId = setTimeout(() => {
+      attackTurnTimeoutId = null;
+      advanceTurn();
+    }, 60_000);
+  };
 
   // Send current state to the new client
   if (gameStarted) {
@@ -108,19 +153,13 @@ io.on("connection", (socket) => {
       ];
     }
 
-    // Shuffle avatar indices to assign random avatars
-    const avatarIndices = [0, 1, 2, 3];
-    for (let i = avatarIndices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [avatarIndices[i], avatarIndices[j]] = [
-        avatarIndices[j],
-        avatarIndices[i],
-      ];
-    }
+    const avatarIndexByName = new Map(
+      players.map((name, index) => [name, index % 4])
+    );
 
-    orderedPlayers = shuffledPlayers.map((name, index) => ({
+    orderedPlayers = shuffledPlayers.map((name) => ({
       name,
-      avatarIndex: avatarIndices[index % 4], // Assign random unique avatar
+      avatarIndex: avatarIndexByName.get(name) ?? 0,
       score: 0,
     }));
 
@@ -283,49 +322,55 @@ io.on("connection", (socket) => {
 
     // Emit results to show on client (e.g. "You got X soldiers!")
     // Sending 'turn_recap' to match client expectation
-    socket.emit("turn_recap", {
+    io.emit("turn_recap", {
       player: orderedPlayers[currentPlayerIndex],
       soldiers,
       movements,
       correctAnswers,
     });
+
+    if (attackPhaseTimeoutId) {
+      clearTimeout(attackPhaseTimeoutId);
+      attackPhaseTimeoutId = null;
+    }
+
+    attackPhaseTimeoutId = setTimeout(() => {
+      attackPhaseTimeoutId = null;
+      startAttackPhaseNow();
+    }, 2500);
   });
 
   // Handle request to start attack phase
   socket.on("start_attack_phase", () => {
-    const currentPlayer = orderedPlayers[currentPlayerIndex];
-    io.emit("attack_started", {
-      player: currentPlayer,
-    });
+    if (attackPhaseTimeoutId) {
+      clearTimeout(attackPhaseTimeoutId);
+      attackPhaseTimeoutId = null;
+    }
+    startAttackPhaseNow();
   });
 
   // Handle request for next turn
   socket.on("next_turn_request", () => {
-    // Advance player
-    currentPlayerIndex++;
-    if (currentPlayerIndex >= orderedPlayers.length) {
-      currentPlayerIndex = 0;
-      currentRound++;
+    if (attackPhaseTimeoutId) {
+      clearTimeout(attackPhaseTimeoutId);
+      attackPhaseTimeoutId = null;
     }
-
-    // Check game over
-    if (currentRound > totalRounds) {
-      io.emit("game_over", {
-        players: orderedPlayers,
-        history: gameHistory,
-      });
-    } else {
-      // Announce next turn
-      const nextPlayer = orderedPlayers[currentPlayerIndex];
-      io.emit("turn_announcement", {
-        player: nextPlayer,
-        round: currentRound,
-        totalRounds,
-      });
+    if (attackTurnTimeoutId) {
+      clearTimeout(attackTurnTimeoutId);
+      attackTurnTimeoutId = null;
     }
+    advanceTurn();
   });
 
   socket.on("game_reset", () => {
+    if (attackPhaseTimeoutId) {
+      clearTimeout(attackPhaseTimeoutId);
+      attackPhaseTimeoutId = null;
+    }
+    if (attackTurnTimeoutId) {
+      clearTimeout(attackTurnTimeoutId);
+      attackTurnTimeoutId = null;
+    }
     gameStarted = false;
     players = [];
     orderedPlayers = [];

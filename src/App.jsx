@@ -20,6 +20,7 @@ function GameNavigator() {
     currentRound: 1,
     currentPlayer: null,
     turnStats: { soldiers: 0, movements: 0 },
+    attackEndsAt: null,
     finalPlayers: [],
     questions: [],
     questionIndices: [],
@@ -86,6 +87,7 @@ function GameNavigator() {
       setGameData((prev) => ({
         ...prev,
         currentPlayer: data.player,
+        attackEndsAt: data.endsAt ?? null,
       }));
       setGameState("ATTACK");
       navigate("/attack");
@@ -110,6 +112,7 @@ function GameNavigator() {
         currentRound: 1,
         currentPlayer: null,
         turnStats: { soldiers: 0, movements: 0 },
+        attackEndsAt: null,
         finalPlayers: [],
         questions: [],
         questionIndices: [],
@@ -197,8 +200,12 @@ function GameNavigator() {
         path="/attack"
         element={
           <AttackScreen
+            key={`${gameData.currentPlayer?.name || "attack"}-${
+              gameData.attackEndsAt || "no-ends"
+            }`}
             player={gameData.currentPlayer}
             myPlayerName={myPlayerName}
+            attackEndsAt={gameData.attackEndsAt}
           />
         }
       />
