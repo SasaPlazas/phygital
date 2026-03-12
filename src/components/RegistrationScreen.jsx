@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { socket } from "../socket";
-import logo from "../assets/HexArena.png";
+import logo from "../assets/Logo.png";
+import frameBg from "../assets/Frame 1.png";
 import "./RegistrationScreen.css";
 
 export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
@@ -71,7 +72,10 @@ export default function RegistrationScreen({ setMyPlayerName, myPlayerName }) {
   };
 
   return (
-    <div className="registration-wrapper">
+    <div
+      className="registration-wrapper"
+      style={{ backgroundImage: `url(${frameBg})` }}
+    >
       <div className="registration-container">
         <img className="brand-logo" src={logo} alt="HexArena" />
         <h1>Registro de Jugadores</h1>

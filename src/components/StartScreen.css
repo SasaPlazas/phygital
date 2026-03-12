@@ -1,5 +1,6 @@
 .start-wrapper {
   min-height: 100vh;
+  min-height: 100svh;
   width: 100%;
   background-position: center;
   background-size: cover;
@@ -8,15 +9,16 @@
   place-items: center;
   position: relative;
   padding: 2rem 1rem;
+  overflow: hidden;
 }
 
 .start-overlay {
   position: absolute;
   inset: 0;
-  background: (
+  background: radial-gradient(
     1200px 700px at 50% 35%,
-    rgba(245, 228, 200, 0.7) 0%,
-    rgba(143, 116, 74, 0.75) 100%
+    rgba(245, 228, 200, 0.45) 0%,
+    rgba(143, 116, 74, 0.55) 100%
   );
 }
 
@@ -30,12 +32,10 @@
   gap: 2.25rem;
 }
 
-
-
 .start-cta {
   width: min(360px, 80%);
   background-color: var(--accent);
-  color: var(--accent-text);
+  color: rgb(242, 242, 242);
   border: none;
   padding: 1rem 1.5rem;
   border-radius: 16px;

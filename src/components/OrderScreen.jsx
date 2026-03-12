@@ -1,7 +1,6 @@
 import "./OrderScreen.css";
 import { socket } from "../socket";
 import avatars from "../avatars";
-import logo from "../assets/HexArena.png";
 
 export default function OrderScreen({ players, totalRounds }) {
   const handleStartRounds = () => {
@@ -11,7 +10,6 @@ export default function OrderScreen({ players, totalRounds }) {
   return (
     <div className="order-wrapper">
       <div className="order-container">
-        <img className="order-logo" src={logo} alt="HexArena" />
 
         <div className="players-grid-container">
           <div className="players-grid">

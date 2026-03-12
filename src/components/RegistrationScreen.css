@@ -3,25 +3,21 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  min-height: 100svh;
   width: 100%;
-  background-image: radial-gradient(
-      900px 600px at 50% 40%,
-      var(--app-bg) 0%,
-      var(--app-bg-2) 100%
-    ),
-    var(--app-bg-pattern);
-  background-position: center, center;
-  background-repeat: no-repeat, repeat;
-  background-size: auto, var(--app-bg-pattern-size);
-  background-blend-mode: normal, multiply;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-color: var(--app-bg-2);
   padding: 2rem 1rem;
+  overflow: hidden;
 }
 
 .registration-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2.6rem 2.2rem;
+  padding: 1.75rem 2.2rem 2.6rem;
   width: 100%;
   max-width: 450px;
   gap: 1.5rem;
@@ -32,22 +28,45 @@
 }
 
 .brand-logo {
-  width: min(320px, 85%);
+  width: min(360px, 60%);
   height: auto;
-  margin-bottom: 0.25rem;
+  margin-top: -2.1rem;
 }
 
 .registration-container h1 {
-  font-size: 2rem;
+  font-size: clamp(1.35rem, 4.8vw, 2rem);
   color: var(--text);
   margin: 0;
   text-align: center;
+  white-space: nowrap;
+  line-height: 1.05;
 }
 
 .subtitle {
   color: var(--muted);
   margin-top: -1.1rem;
   font-size: 0.95rem;
+}
+
+@media (max-width: 420px) {
+  .registration-container {
+    padding: 1.55rem 1.4rem 2.2rem;
+    gap: 1.2rem;
+  }
+
+  .brand-logo {
+    width: min(320px, 92%);
+    margin-top: -2.25rem;
+  }
+
+  .registration-container h1 {
+    font-size: 1.45rem;
+  }
+
+  .subtitle {
+    margin-top: -0.85rem;
+    font-size: 0.9rem;
+  }
 }
 
 .input-group {
