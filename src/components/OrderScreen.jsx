@@ -46,7 +46,7 @@ export default function OrderScreen({ players, totalRounds }) {
             Iniciar rondas
           </button>
           <button
-            className="reset-button"
+            className="order-reset-button"
             onClick={() => socket.emit("game_reset")}
           >
             Reiniciar Partida

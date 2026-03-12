@@ -126,23 +126,6 @@
   flex-wrap: wrap;
 }
 
-.reset-button {
-  background-color: transparent;
-  color: rgba(59, 42, 26, 0.75);
-  border: 1px solid var(--border);
-  padding: 0.8rem 1.5rem;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.reset-button:hover {
-  background-color: rgba(59, 42, 26, 0.06);
-  border-color: rgba(59, 42, 26, 0.3);
-}
-
 .start-rounds-button {
   background-color: var(--accent);
   color: var(--accent-text);
@@ -158,4 +141,40 @@
 
 .start-rounds-button:hover {
   background-color: var(--accent-pressed);
+}
+
+.order-reset-button {
+  background-color: transparent;
+  color: rgba(77, 59, 6, 0.9);
+  border: 1px solid rgba(77, 59, 6, 0.9);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.order-reset-button:hover {
+  background-color: rgba(185, 28, 28, 0.06);
+  border-color: rgba(77, 59, 6, 0.9);
+  color:rgba(77, 59, 6, 0.9);
+}
+
+@media (max-width: 540px) {
+  .buttons-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .start-rounds-button {
+    width: 100%;
+    padding: 0.95rem 2rem;
+    font-size: 1.05rem;
+  }
+
+  .order-reset-button {
+    width: 100%;
+  }
 }
